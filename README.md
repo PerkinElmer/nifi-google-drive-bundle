@@ -2,12 +2,11 @@
 
 ## Things to install
 
-1. sbt
-1. maven (mvn)
-1. git
-1. NiFi
-1. (optional) git UI tool like GitHub Desktop or Sourcetree
-1. (optional) IntelliJ community edition
+1. maven (mvn) https://maven.apache.org/
+1. git https://git-scm.com/
+1. NiFi https://nifi.apache.org/
+1. (optional) git UI tool like GitHub Desktop (https://desktop.github.com/) or Sourcetree (https://www.sourcetreeapp.com/)
+1. (optional) IntelliJ community edition (https://www.jetbrains.com/idea/)
 
 ## Start from a template
 
