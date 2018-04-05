@@ -43,8 +43,8 @@
     </properties>
 
     <modules>
-        <module>nifi-example-processor-processors</module>
-        <module>nifi-example-processor-nar</module>
+        <module>nifi-google-drive-processor-processors</module>
+        <module>nifi-google-drive-processor-nar</module>
     </modules>
 
     <dependencies>
@@ -53,6 +53,34 @@
             <artifactId>scalatest_${scala.major.version}</artifactId>
             <version>${scalatest.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>1.23.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-drive</artifactId>
+            <version>v3-rev105-1.23.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20090211</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client-java6 -->
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-java6</artifactId>
+            <version>1.11.0-beta</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client-jetty -->
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-jetty</artifactId>
+            <version>1.11.0-beta</version>
         </dependency>
     </dependencies>
 
