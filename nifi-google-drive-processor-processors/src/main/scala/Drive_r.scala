@@ -1,6 +1,3 @@
-import java.io._
-import java.util
-
 import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
@@ -11,13 +8,17 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.util.store.FileDataStoreFactory
 import com.google.api.services.drive.Drive
+import java.io._
+import java.util
 
-//import com.google.api.services.drive.model.{Change, StartPageToken}
+import com.google.api.services.drive.model.{Change, StartPageToken}
+import com.sun.xml.internal.ws.api.addressing.WSEndpointReference
 
-import scala.collection.immutable.List
 import scala.collection.JavaConverters._
+import scala.collection.immutable.List
 
-object drive_r{
+object Drive_r {
+
   /** Application name. */
   private val APPLICATION_NAME = "Drive API Java Quickstart"
   /** Directory to store user credentials for this application. */
@@ -81,31 +82,18 @@ object drive_r{
 
     for(fileId <- fileIds){
       // store in this folder under same file name
+
       var file = new File("C:\\Users\\redderre\\PEfiles\\" + fileId._1)
       var fileOutputStream = new FileOutputStream(file)
-
+      try{
       // download file
       driveService.files().get(fileId._2).executeMediaAndDownloadTo(fileOutputStream)
+    }catch{
+        case e: Exception => println("NonBinary File found")
+      }
     }
   }
-  /*
-    def changes(savedPageToken: StartPageToken, driveService: Drive): List[(String, String)] ={
-      var pageToken: String = (savedPageToken).asInstanceOf[String]
-      var fileId: List[(String, String)] = List()
-      while(pageToken != null){
-        val changes = driveService.changes.list(pageToken).execute
-        for(change <- changes.getChanges){
-          //Store in list
-          var file = change.getFile
-          fileId = (file.getName, file.getId) :: fileId
-        }
-        if(changes.getNewStartPageToken != null){
-            pageToken = changes.getNextPageToken
-          }
-      }
-      fileId
-    }
-  */
+
   @throws[IOException]
   def main(args: Array[String]): Unit = { // Build a new authorized API client service.
     val service = getDriveService
@@ -129,5 +117,6 @@ object drive_r{
     //val f = changes(response, service)
     //print("a")
   }
+
 
 }
