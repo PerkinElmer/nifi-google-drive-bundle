@@ -8,14 +8,11 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.util.store.FileDataStoreFactory
 import com.google.api.services.drive.Drive
+import com.google.api.services.drive.model.File
 import java.io._
 import java.util
-
-import com.google.api.services.drive.model.{Change, StartPageToken}
-import com.sun.xml.internal.ws.api.addressing.WSEndpointReference
-
 import scala.collection.JavaConverters._
-import scala.collection.immutable.List
+import scala.collection.mutable.ListBuffer
 
 object Drive_r {
 
@@ -38,6 +35,7 @@ object Drive_r {
 
   private val Q = ("fileExtension = 'sas7bdat'")
 
+
   try {
     HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport
     DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR)
@@ -55,7 +53,7 @@ object Drive_r {
     */
   @throws[IOException]
   def authorize: Credential = { // Load client secrets.
-    val in = getClass.getResourceAsStream("/client_secret.json");
+    val in = getClass.getResourceAsStream("/client_secret.json")
     val clientSecrets: GoogleClientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in))
     // Build flow and trigger user authorization request.
     val flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES).
@@ -77,43 +75,66 @@ object Drive_r {
     new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build
   }
 
-  @throws[FileNotFoundException]
-  def downloadDriveFile(fileIds: List[(String, String)], driveService: Drive) = {
+//  @throws[FileNotFoundException]
+//  def downloadDriveFile(fileIds: List[(String, String)], driveService: Drive) = {
+//
+//    for(fileId <- fileIds){
+//      // store in this folder under same file name
+//
+//      var file = new File("C:\\Users\\redderre\\PEfiles\\" + fileId._1)
+//      var fileOutputStream = new FileOutputStream(file)
+//      try{
+//      // download file
+//      driveService.files().get(fileId._2).executeMediaAndDownloadTo(fileOutputStream)
+//    }catch{
+//        case e: Exception => println("NonBinary File found")
+//      }
+//    }
+//  }
 
-    for(fileId <- fileIds){
-      // store in this folder under same file name
-
-      var file = new File("C:\\Users\\redderre\\PEfiles\\" + fileId._1)
-      var fileOutputStream = new FileOutputStream(file)
-      try{
-      // download file
-      driveService.files().get(fileId._2).executeMediaAndDownloadTo(fileOutputStream)
-    }catch{
-        case e: Exception => println("NonBinary File found")
+  //takes file/folder ID as input
+  //if it's just a file, return that path
+  //if it's a folder, return a list of its children's paths
+  def listFiles(service: Drive, fileId: String): List[String] = {
+    var listBuffer = ListBuffer[String]()
+    val file = service.files().get(fileId).setFields("parents, name, mimeType, id").execute()
+    if (file.getMimeType != "application/vnd.google-apps.folder") {
+      listBuffer += getParents(service, file, file.getName)
+    }
+    else {
+      println(file)
+      val files = service.files.list.setQ("'" + file.getId +"' in parents and trashed=false").setFields("files(name, id, mimeType, parents)").execute.getFiles
+      for ((file, index) <- files.asScala.zipWithIndex) {
+        var finalPath = getParents(service, file, file.getName)
+        listBuffer += finalPath
       }
     }
+    listBuffer.toList
   }
 
+
+  def getParents(service: Drive, file: File, filePath: String): String = {
+    var finalPath = filePath
+    //if you have no (parents, you're the root, so continue while this is not true
+    if (file.getParents != null) {
+      val parentId: String = file.getParents.get(0)
+      val parentFile = service.files.get(parentId).setFields("id, name, parents").execute()
+      finalPath = parentFile.getName + "\\" + filePath
+      getParents(service, parentFile, finalPath)
+    }
+    else {
+      finalPath
+    }
+  }
   @throws[IOException]
   def main(args: Array[String]): Unit = { // Build a new authorized API client service.
+
     val service = getDriveService
-    val response = service.changes.getStartPageToken.execute
+    service.changes.getStartPageToken.execute
+    val x = listFiles(service, "14JJ3vRHebTHAws7xfBNUI55M58NaMSU6")//14JJ3vRHebTHAws7xfBNUI55M58NaMSU6
+    print(x)
 
-    val result = service.files.list.setQ(Q).setFields("nextPageToken, files(id, name)").execute
-    val files = result.getFiles
-
-    var fileId: List[(String, String)] = List()
-
-    if (files == null || files.size == 0) System.out.println("No files found.")
-    else {
-      System.out.println("Files:")
-      for ((file, index) <- files.asScala.zipWithIndex) {
-        System.out.printf("%s (%s)\n", file.getName, file.getId)
-        fileId = (file.getName, file.getId) :: fileId
-      }
-    }
-
-    downloadDriveFile(fileId, service)
+    //downloadDriveFile(fileId, service)
     //val f = changes(response, service)
     //print("a")
   }
