@@ -11,6 +11,7 @@ import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.File
 import java.io._
 import java.util
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
@@ -75,22 +76,35 @@ object Drive_r {
     new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build
   }
 
-//  @throws[FileNotFoundException]
-//  def downloadDriveFile(fileIds: List[(String, String)], driveService: Drive) = {
-//
-//    for(fileId <- fileIds){
-//      // store in this folder under same file name
-//
-//      var file = new File("C:\\Users\\redderre\\PEfiles\\" + fileId._1)
-//      var fileOutputStream = new FileOutputStream(file)
-//      try{
-//      // download file
-//      driveService.files().get(fileId._2).executeMediaAndDownloadTo(fileOutputStream)
-//    }catch{
-//        case e: Exception => println("NonBinary File found")
-//      }
-//    }
-//  }
+
+  @throws[FileNotFoundException]
+  def downloadDriveFile(fileIds: List[(String)], driveService: Drive) = {
+
+    import java.io.File
+
+    for(fileId <- fileIds){
+      // strip off file name
+      var index = fileId.lastIndexOf("\\")
+      var fileToDL = fileId.substring(index + 1)
+      var filePath = "C:\\Users\\redderre\\" + fileId.substring(0, index - 1)
+      var file = new File(filePath)
+
+      //if current directory for file dne, create
+      if(!file.exists()){
+        file.mkdirs();
+        file.setExecutable(true);
+      }
+
+      var f2 = fileId
+      var fileOutputStream = new FileOutputStream(f2)
+      try{
+      // download file - .get(need fileID)
+        driveService.files().get(fileToDL).executeMediaAndDownloadTo(fileOutputStream)
+    }catch{
+        case e: Exception => println("NonBinary File found")
+      }
+    }
+  }
 
   //takes file/folder ID as input
   //if it's just a file, return that path
@@ -126,6 +140,7 @@ object Drive_r {
       finalPath
     }
   }
+
   @throws[IOException]
   def main(args: Array[String]): Unit = { // Build a new authorized API client service.
 
@@ -134,10 +149,6 @@ object Drive_r {
     val x = listFiles(service, "14JJ3vRHebTHAws7xfBNUI55M58NaMSU6")//14JJ3vRHebTHAws7xfBNUI55M58NaMSU6
     print(x)
 
-    //downloadDriveFile(fileId, service)
-    //val f = changes(response, service)
-    //print("a")
+    downloadDriveFile(x, service)
   }
-
-
 }
