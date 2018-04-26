@@ -13,7 +13,6 @@ import java.io._
 import java.util
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
 
 object Drive_r {
 
@@ -112,25 +111,24 @@ object Drive_r {
   //takes file/folder ID as input
   //if it's just a file, return that path
   //if it's a folder, return a list of its children's paths
-  def listFiles(service: Drive, fileId: String): List[String] = {
-    var listBuffer = ListBuffer[String]()
+  def listFiles(service: Drive, fileId: String): List[(String, String)] = {
+    var list : List[(String,String)] = List()
     val file = service.files().get(fileId).setFields("parents, name, mimeType, id").execute()
     if (file.getMimeType != "application/vnd.google-apps.folder") {
-      listBuffer += getParents(service, file, file.getName)
+      list = (file.getId, getParents(service, file, file.getName)) :: list
     }
     else {
-      println(file)
+      println("the folder you are looking into: " + file)
       val files = service.files.list.setQ("'" + file.getId +"' in parents and trashed=false").setFields("files(name, id, mimeType, parents)").execute.getFiles
       for ((file, index) <- files.asScala.zipWithIndex) {
-        var finalPath = getParents(service, file, file.getName)
-        listBuffer += finalPath
+        list = (file.getId, getParents(service, file, file.getName)) :: list
       }
     }
-    listBuffer.toList
+    list
   }
 
-
   def getParents(service: Drive, file: File, filePath: String): String = {
+
     var finalPath = filePath
     //if you have no (parents, you're the root, so continue while this is not true
     if (file.getParents != null) {
@@ -149,7 +147,7 @@ object Drive_r {
 
     val service = getDriveService
     service.changes.getStartPageToken.execute
-    val x = listFiles(service, "14JJ3vRHebTHAws7xfBNUI55M58NaMSU6")//14JJ3vRHebTHAws7xfBNUI55M58NaMSU6
+    val x = listFiles(service, "14JJ3vRHebTHAws7xfBNUI55M58NaMSU6")//14JJ3vRHebTHAws7xfBNUI55M58NaMSU6 |||| 1wvI23jzfNCiLduOPT-bMDzIC9CZCAh6i : the former is a folder, the latter is a file
     print(x)
 
     downloadDriveFile(x, service)
