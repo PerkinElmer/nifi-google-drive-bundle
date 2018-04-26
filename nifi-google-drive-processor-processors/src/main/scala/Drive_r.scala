@@ -80,15 +80,15 @@ object Drive_r {
   }
 
   @throws[FileNotFoundException]
-  def downloadDriveFile(fileIds: List[(String)], driveService: Drive) = {
+  def downloadDriveFile(fileIds: List[(String, String)], driveService: Drive) = {
 
     import java.io.File
 
     for(fileId <- fileIds){
       // strip off file name
-      var index = fileId.lastIndexOf("\\")
-      var fileToDL = fileId.substring(index + 1)
-      var filePath = "C:\\Users\\redderre\\" + fileId.substring(0, index)
+      var index = fileId._2.lastIndexOf("\\")
+      var fileToDL = fileId._2.substring(index + 1)
+      var filePath = "C:\\Users\\redderre\\" + fileId._2.substring(0, index)
       var file = new File(filePath)
 
       //if current directory for file dne, create
@@ -97,11 +97,11 @@ object Drive_r {
         file.setExecutable(true);
       }
 
-      var absFilePath = "C:\\Users\\redderre\\" + fileId
+      var absFilePath = "C:\\Users\\redderre\\" + fileId._2
       var fileOutputStream = new FileOutputStream(absFilePath)
       try{
       // todo download file - .get(need fileID) - won't DL otherwise
-        driveService.files().get(fileToDL).executeMediaAndDownloadTo(fileOutputStream)
+        driveService.files().get(fileId._1).executeMediaAndDownloadTo(fileOutputStream)
       }catch{
         case e: Exception => println("NonBinary File found")
       }
