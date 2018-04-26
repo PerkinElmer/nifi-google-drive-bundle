@@ -34,6 +34,12 @@ object Drive_r {
     */
   private val SCOPES = util.Arrays.asList("https://www.googleapis.com/auth/drive")
 
+  private var CLIENT_ID = "7695128173-dpt0u3galufa6jk22q51lsuv6rta65vp.apps.googleusercontent.com"
+
+  private var CLIENT_SECRET = "maXDAoyuytcz5tdI-3dF-kCf"
+
+  private var ACCESS_TYPE = "online"
+
   private val Q = ("fileExtension = 'sas7bdat'")
 
 
@@ -53,12 +59,10 @@ object Drive_r {
     * @throws IOException
     */
   @throws[IOException]
-  def authorize: Credential = { // Load client secrets.
-    val in = getClass.getResourceAsStream("/client_secret.json")
-    val clientSecrets: GoogleClientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in))
+  def authorize: Credential = {
     // Build flow and trigger user authorization request.
-    val flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES).
-      setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("online").build
+    val flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, CLIENT_ID, CLIENT_SECRET, SCOPES).
+      setDataStoreFactory(DATA_STORE_FACTORY).setAccessType(ACCESS_TYPE).build
     val credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user")
     System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath)
     return credential
@@ -76,7 +80,6 @@ object Drive_r {
     new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build
   }
 
-
   @throws[FileNotFoundException]
   def downloadDriveFile(fileIds: List[(String)], driveService: Drive) = {
 
@@ -86,7 +89,7 @@ object Drive_r {
       // strip off file name
       var index = fileId.lastIndexOf("\\")
       var fileToDL = fileId.substring(index + 1)
-      var filePath = "C:\\Users\\redderre\\" + fileId.substring(0, index - 1)
+      var filePath = "C:\\Users\\redderre\\" + fileId.substring(0, index)
       var file = new File(filePath)
 
       //if current directory for file dne, create
@@ -95,12 +98,12 @@ object Drive_r {
         file.setExecutable(true);
       }
 
-      var f2 = fileId
-      var fileOutputStream = new FileOutputStream(f2)
+      var absFilePath = "C:\\Users\\redderre\\" + fileId
+      var fileOutputStream = new FileOutputStream(absFilePath)
       try{
-      // download file - .get(need fileID)
+      // todo download file - .get(need fileID) - won't DL otherwise
         driveService.files().get(fileToDL).executeMediaAndDownloadTo(fileOutputStream)
-    }catch{
+      }catch{
         case e: Exception => println("NonBinary File found")
       }
     }
