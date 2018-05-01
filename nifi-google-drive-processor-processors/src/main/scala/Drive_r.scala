@@ -57,10 +57,24 @@ object Drive_r {
     * @return an authorized Credential object.
     * @throws IOException
     */
+  /** hardcoding the client id and secret instead of reading in the /client_secret.json seems to make authorization
+    * reprompt you for you login credentials every time the program is run
   @throws[IOException]
   def authorize: Credential = {
     // Build flow and trigger user authorization request.
     val flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, CLIENT_ID, CLIENT_SECRET, SCOPES).
+      setDataStoreFactory(DATA_STORE_FACTORY).setAccessType(ACCESS_TYPE).build
+    val credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user")
+    System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath)
+    return credential
+  }
+  */
+  @throws[IOException]
+  def authorize: Credential = { // Load client secrets.
+    val in = getClass.getResourceAsStream("/client_secret.json")
+    val clientSecrets: GoogleClientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in))
+    // Build flow and trigger user authorization request.
+    val flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES).
       setDataStoreFactory(DATA_STORE_FACTORY).setAccessType(ACCESS_TYPE).build
     val credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user")
     System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath)
@@ -75,8 +89,7 @@ object Drive_r {
     */
   @throws[IOException]
   def getDriveService: Drive = {
-    val credential = authorize
-    new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build
+    new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, authorize).setApplicationName(APPLICATION_NAME).build
   }
 
   @throws[FileNotFoundException]
