@@ -80,33 +80,51 @@ object Drive_r {
   }
 
   @throws[FileNotFoundException]
-  def downloadDriveFile(fileIds: List[(String, String)], driveService: Drive) = {
+  def downloadDriveFile(fileIds: List[(File, String)], driveService: Drive) = {
+    val diskPath = "C:\\Users\\redderre\\"
 
     import java.io.File
 
-    for(fileId <- fileIds){
-      // strip off file name
-      var index = fileId._2.lastIndexOf("\\")
-      var fileToDL = fileId._2.substring(index + 1)
-      var filePath = "C:\\Users\\redderre\\" + fileId._2.substring(0, index)
-      var file = new File(filePath)
+    var filePath: String = ""
 
-      //if current directory for file dne, create
-      if(!file.exists()){
-        file.mkdirs();
-        file.setExecutable(true);
+    for(fileId <- fileIds) {
+      var fileToDL = fileId._1.getId
+
+      //if this is a file, check if the directory where it belongs is created, if not create it
+      //then download the file
+      if(!fileId._1.getMimeType.equals("application/vnd.google-apps.folder") ){
+        val index = fileId._2.lastIndexOf("\\")
+        filePath = diskPath + fileId._2.substring(0, index)
+        val file = new File(filePath)
+
+        //if current directory for file dne, create
+        if(!file.exists()){
+          file.mkdirs()
+          file.setExecutable(true)
+        }
+
+        val absFilePath = diskPath + fileId._2
+        val fileOutputStream = new FileOutputStream(absFilePath)
+        try{
+          driveService.files().get(fileId._1.getId).executeMediaAndDownloadTo(fileOutputStream)
+        }catch{
+          case e: Exception => println("NonBinary File found")
+        }
       }
+      //if this is a folder, check if the folder already has been created, if not create it
+      else{
+        filePath = diskPath + fileId._2
+        val file = new File(filePath)
 
-      var absFilePath = "C:\\Users\\redderre\\" + fileId._2
-      var fileOutputStream = new FileOutputStream(absFilePath)
-      try{
-      // todo download file - .get(need fileID) - won't DL otherwise
-        driveService.files().get(fileId._1).executeMediaAndDownloadTo(fileOutputStream)
-      }catch{
-        case e: Exception => println("NonBinary File found")
+        //if current directory for file dne, create
+        if(!file.exists()){
+          file.mkdirs()
+          file.setExecutable(true)
+        }
       }
     }
   }
+
 
   //takes file/folder ID as input
   //if it's just a file, return that path
