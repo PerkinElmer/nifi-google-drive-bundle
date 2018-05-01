@@ -70,9 +70,8 @@ object Drive_r {
   }
   */
   @throws[IOException]
-  def authorize: Credential = { // Load client secrets.
-    val in = getClass.getResourceAsStream("/client_secret.json")
-    val clientSecrets: GoogleClientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in))
+  def authorize: Credential = { 
+    val clientSecrets: GoogleClientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(getClass.getResourceAsStream("/client_secret.json")))
     // Build flow and trigger user authorization request.
     val flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES).
       setDataStoreFactory(DATA_STORE_FACTORY).setAccessType(ACCESS_TYPE).build
