@@ -25,27 +25,27 @@ import org.scalatest._
 import org.apache.nifi.util.{ TestRunner, TestRunners }
 
 class ExampleProcessorSpec extends FunSpec {
-  import scala.collection.JavaConverters._
-  import ExampleProcessorProperties.ExampleProperty
-  import ExampleProcessorRelationships.{ RelSuccess, RelFailure }
-
-  val SomeContent = "some content"
-
-  describe("ExampleProcessor") {
-    it("should successfully transfer a FlowFile") {
-      val processor = new ExampleProcessor
-      val runner = TestRunners.newTestRunner(processor)
-
-      val content = new ByteArrayInputStream(SomeContent.getBytes)
-      runner.enqueue(content)
-      runner.run(1)
-
-      runner.assertTransferCount(RelSuccess, 1)
-      runner.assertTransferCount(RelFailure, 0)
-
-      for (flowFile <- runner.getFlowFilesForRelationship(RelSuccess).asScala) {
-        flowFile.getSize > 0
-      }
-    }
-  }
+  //  import scala.collection.JavaConverters._
+  //  import ExampleProcessorProperties.ExampleProperty
+  //  import ExampleProcessorRelationships.{ RelSuccess, RelFailure }
+  //
+  //  val SomeContent = "some content"
+  //
+  //  describe("ExampleProcessor") {
+  //    it("should successfully transfer a FlowFile") {
+  //      val processor = new ExampleProcessor
+  //      val runner = TestRunners.newTestRunner(processor)
+  //
+  //      val content = new ByteArrayInputStream(SomeContent.getBytes)
+  //      runner.enqueue(content)
+  //      runner.run(1)
+  //
+  //      runner.assertTransferCount(RelSuccess, 1)
+  //      runner.assertTransferCount(RelFailure, 0)
+  //
+  //      for (flowFile <- runner.getFlowFilesForRelationship(RelSuccess).asScala) {
+  //        flowFile.getSize > 0
+  //      }
+  //    }
+  //  }
 }
