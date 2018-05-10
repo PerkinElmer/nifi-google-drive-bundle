@@ -22,7 +22,6 @@ import org.apache.nifi.annotation.behavior.{ ReadsAttribute, ReadsAttributes, Wr
 import org.apache.nifi.annotation.documentation.{ CapabilityDescription, SeeAlso, Tags }
 import org.apache.nifi.components.PropertyDescriptor
 import org.apache.nifi.processor._
-import com.perkinelmer.Drive_r
 @Tags(Array("please work"))
 @CapabilityDescription("A list processor")
 @SeeAlso(Array())
@@ -45,13 +44,6 @@ class ListFilesProcessor extends AbstractProcessor with ListFilesProcessorProper
 
   override def getRelationships(): java.util.Set[Relationship] = {
     relationships.asJava
-  }
-
-  private def generateData(context: ProcessContext) = {
-    val id = context.getProperty("File ID").evaluateAttributeExpressions().getValue
-    val service = Drive_r.getDriveService
-    val files = Drive_r.listFiles(service, id)
-    ("{\"data\":{\"files\":\"" + files + "\"}}").getBytes()
   }
 
   //  override def onTrigger(context: ProcessContext, session: ProcessSession): Unit = {
@@ -79,23 +71,18 @@ class ListFilesProcessor extends AbstractProcessor with ListFilesProcessorProper
 
     import org.apache.nifi.processor.io.OutputStreamCallback
 
-    var flowFile = session.create //id, name, path
-    //    if (data.get().length > 0) flowFile = session.write(flowFile, new OutputStreamCallback() {
-    //      @throws[IOException]
-    //      def process(out: OutputStream): Unit = {
-    //        out.write(data.get())
-    //      }
-    //    })
     val files = getFileList(context)
-    session.putAttribute(flowFile, "ID", context.getProperty("File ID").evaluateAttributeExpressions().getValue) // given
-
-    //session.putAttribute(flowFile, "name", files(files.size - 1)(2)) //hardcoded as hell todo: probably fix this
-    session.putAttribute(flowFile, "name", "not implemented")
-    session.getProvenanceReporter.create(flowFile)
-    session.transfer(flowFile, RelSuccess)
+    for (file <- files) {
+      var flowFile = session.create
+      session.putAttribute(flowFile, "ID", file._1.getId)
+      session.putAttribute(flowFile, "name", file._1.getName)
+      session.putAttribute(flowFile, "path", file._2)
+      session.getProvenanceReporter.create(flowFile)
+      session.transfer(flowFile, RelSuccess)
+    }
   }
   def getFileList(context: ProcessContext) = {
-    val id = context.getProperty("File ID").evaluateAttributeExpressions().getValue
+    val id = context.getProperty("ID").evaluateAttributeExpressions().getValue
     val service = Drive_r.getDriveService
     Drive_r.listFiles(service, id)
   }

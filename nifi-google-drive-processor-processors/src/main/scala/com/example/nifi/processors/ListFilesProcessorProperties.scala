@@ -23,9 +23,9 @@ trait ListFilesProcessorProperties {
   lazy val properties = List(IDProperty)
   val IDProperty =
     new PropertyDescriptor.Builder()
-      .name("File ID")
+      .name("ID")
       .description("Whatever the property does")
-      .defaultValue("14JJ3vRHebTHAws7xfBNUI55M58NaMSU6")
+      .defaultValue("root")
       //.required(true)
       .expressionLanguageSupported(true)
       .addValidator(Validator.VALID)

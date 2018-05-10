@@ -62,9 +62,10 @@ object Drive_r {
    * @throws IOException
    */
 
-  /** hardcoding the client id and secret instead of reading in the /client_secret.json seems to make authorization
-    * reprompt you for you login credentials every time the program is run
-  */
+  /**
+   * hardcoding the client id and secret instead of reading in the /client_secret.json seems to make authorization
+   * reprompt you for you login credentials every time the program is run
+   */
   @throws[IOException]
   def authorize: Credential = { // Load client secrets.
     val in = getClass.getResourceAsStream("/client_secret.json")
@@ -96,37 +97,36 @@ object Drive_r {
 
     var filePath: String = ""
 
-    for(fileId <- fileIds) {
+    for (fileId <- fileIds) {
       var fileToDL = fileId._1.getId
 
       //if this is a file, check if the directory where it belongs is created, if not create it
       //then download the file
-      if(!fileId._1.getMimeType.equals("application/vnd.google-apps.folder") ){
+      if (!fileId._1.getMimeType.equals("application/vnd.google-apps.folder")) {
         val index = fileId._2.lastIndexOf("\\")
         filePath = diskPath + fileId._2.substring(0, index)
         val file = new File(filePath)
 
         //if current directory for file dne, create
-        if(!file.exists()){
+        if (!file.exists()) {
           file.mkdirs()
           file.setExecutable(true)
         }
 
         val absFilePath = diskPath + fileId._2
         val fileOutputStream = new FileOutputStream(absFilePath)
-        try{
+        try {
           driveService.files().get(fileId._1.getId).executeMediaAndDownloadTo(fileOutputStream)
-        }catch{
+        } catch {
           case e: Exception => println("NonBinary File found")
         }
-      }
-      //if this is a folder, check if the folder already has been created, if not create it
-      else{
+      } //if this is a folder, check if the folder already has been created, if not create it
+      else {
         filePath = diskPath + fileId._2
         val file = new File(filePath)
 
         //if current directory for file dne, create
-        if(!file.exists()){
+        if (!file.exists()) {
           file.mkdirs()
           file.setExecutable(true)
         }

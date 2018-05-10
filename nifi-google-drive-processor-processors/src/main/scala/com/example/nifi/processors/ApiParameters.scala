@@ -10,7 +10,6 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.util.store.FileDataStoreFactory
 import org.apache.nifi.processor.ProcessContext
 
-
 class ApiParameters(val clientSecret: String,
     val clientId: String,
     var http_transport: NetHttpTransport = null,
