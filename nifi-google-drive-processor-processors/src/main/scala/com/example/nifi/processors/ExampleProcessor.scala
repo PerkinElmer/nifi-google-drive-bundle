@@ -18,13 +18,12 @@ package com.example.nifi.processors
 
 import java.io._
 
-import scala.util.Random
-
 import org.apache.nifi.annotation.behavior.{ ReadsAttribute, ReadsAttributes, WritesAttribute, WritesAttributes }
 import org.apache.nifi.annotation.documentation.{ CapabilityDescription, SeeAlso, Tags }
-import org.apache.nifi.annotation.lifecycle.OnScheduled
 import org.apache.nifi.components.PropertyDescriptor
 import org.apache.nifi.processor._
+
+import scala.util.Random
 
 @Tags(Array("example"))
 @CapabilityDescription("An example processor")
@@ -61,6 +60,7 @@ class ExampleProcessor extends AbstractProcessor with ExampleProcessorProperties
 
   override def onTrigger(context: ProcessContext, session: ProcessSession): Unit = {
     import java.io.IOException
+
     import org.apache.nifi.processor.io.OutputStreamCallback
 
     data.set(generateData(context))
