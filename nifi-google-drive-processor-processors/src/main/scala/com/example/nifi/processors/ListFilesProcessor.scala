@@ -76,6 +76,7 @@ class ListFilesProcessor extends AbstractProcessor with ListFilesProcessorProper
       var flowFile = session.create
       session.putAttribute(flowFile, "ID", file._1.getId)
       session.putAttribute(flowFile, "name", file._1.getName)
+      session.putAttribute(flowFile, "mime", file._1.getMimeType)
       session.putAttribute(flowFile, "path", file._2)
       session.getProvenanceReporter.create(flowFile)
       session.transfer(flowFile, RelSuccess)
@@ -83,8 +84,8 @@ class ListFilesProcessor extends AbstractProcessor with ListFilesProcessorProper
   }
   def getFileList(context: ProcessContext) = {
     val id = context.getProperty("ID").evaluateAttributeExpressions().getValue
-    val service = Drive_r.getDriveService
-    Drive_r.listFiles(service, id)
+    val service = DriveAuth.getDriveService
+    DriveAuth.listFiles(service, id)
   }
   protected[this] override def init(context: ProcessorInitializationContext): Unit = {
   }

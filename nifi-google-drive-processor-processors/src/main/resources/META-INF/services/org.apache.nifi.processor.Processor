@@ -14,4 +14,4 @@
 # limitations under the License.
 com.example.nifi.processors.ExampleProcessor
 com.example.nifi.processors.ListFilesProcessor
-com.example.nifi.processors.DownloadFileProcessor
+com.example.nifi.processors.DownloadFilesProcessor
